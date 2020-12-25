@@ -18,10 +18,7 @@ If you use RAT-SQL in your work, please cite it as follows:
 
 ## Changelog
 
-**2020-08-14:**
-- The Docker image now inherits from a CUDA-enabled base image.
-- Clarified memory and dataset requirements on the image.
-- Fixed the issue where token IDs were not converted to word-piece IDs for BERT value linking.  
+**2020-08-14:**0ord-piece IDs for BERT value linking.  
 
 ## Usage
 
@@ -29,6 +26,7 @@ If you use RAT-SQL in your work, please cite it as follows:
 
 Download the datasets: [Spider](https://yale-lily.github.io/spider) and [WikiSQL](https://github.com/salesforce/WikiSQL). In case of Spider, make sure to download the `08/03/2020` version or newer.
 Unpack the datasets somewhere outside this project to create the following directory structure:
+
 ```
 /path/to/data
 ├── spider
@@ -63,6 +61,7 @@ git clone https://github.com/salesforce/WikiSQL third_party/wikisql
 We have provided a `Dockerfile` that sets up the entire environment for you.
 It assumes that you mount the datasets downloaded in Step 1 as a volume `/mnt/data` into a running image.
 Thus, the environment setup for RAT-SQL is:
+
 ``` bash
 docker build -t ratsql .
 docker run --rm -m4g -v /path/to/data:/mnt/data -it ratsql

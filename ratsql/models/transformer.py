@@ -9,6 +9,7 @@ import entmax
 # Adapted from
 # https://github.com/tensorflow/tensor2tensor/blob/0b156ac533ab53f65f44966381f6e147c7371eee/tensor2tensor/layers/common_attention.py
 def relative_attention_logits(query, key, relation):
+    # compute formula (2)-1
     # We can't reuse the same logic as tensor2tensor because we don't share relation vectors across the batch.
     # In this version, relation vectors are shared across heads.
     # query: [batch, heads, num queries, depth].

@@ -128,14 +128,17 @@ def tokenize(string):
         key = "__val_{}_{}__".format(qidx1, qidx2)
         string = string[:qidx1] + key + string[qidx2+1:]
         vals[key] = val
+        # strip "" for columns and strings in sql query
 
     toks = [word.lower() for word in word_tokenize(string)]
     # replace with string value token
     for i in range(len(toks)):
         if toks[i] in vals:
             toks[i] = vals[toks[i]]
+        # retrieve "" for all columns and strings
 
     # find if there exists !=, >=, <=
+    # separate != >= and <= to ! =, > =, < =
     eq_idxs = [idx for idx, tok in enumerate(toks) if tok == "="]
     eq_idxs.reverse()
     prefix = ('!', '>', '<')

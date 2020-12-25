@@ -83,6 +83,7 @@ def compute_cell_value_linking(tokens, schema):
             return False
 
     def db_word_match(word, column, table, db_conn):
+        # query database for whether word is a value in column
         cursor = db_conn.cursor()
 
         p_str = f"select {column} from {table} where {column} like '{word} %' or {column} like '% {word}' or " \

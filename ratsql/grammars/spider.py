@@ -228,11 +228,13 @@ class SpiderLanguage:
         return result
 
     def parse_sql(self, sql, optional=False):
+        # convert content in sub-sentences like select, from to dict
         if optional and sql is None:
             return None
         if self.factorize_sketch == 0:
             return filter_nones({
                 '_type': 'sql',
+                # convert tuple to dic
                 'select': self.parse_select(sql['select']),
                 'where': self.parse_cond(sql['where'], optional=True),
                 'group_by': [self.parse_col_unit(u) for u in sql['groupBy']],
@@ -367,6 +369,9 @@ class SpiderLanguage:
     LOGIC_OPERATORS_F, LOGIC_OPERATORS_B = bimap(
         ('and', 'or'),
         ('And', 'Or'))
+
+
+print('astpretty')
 
 
 @attr.s
@@ -680,6 +685,7 @@ class SpiderUnparser:
                 # Output "ON <cond>" if all tables involved in the condition have been output
                 conds_to_output = []
                 for cond_idx in sorted(cond_indices_by_table[table_id]):
+                    # we use cond_indices_by_table to constrain that constrains on the tables have appeared before
                     if cond_idx in output_cond_indices:
                         continue
                     if tables_involved_by_cond_idx[cond_idx] <= output_table_ids:
@@ -693,4 +699,5 @@ class SpiderUnparser:
         return ' '.join(tokens)
 
     def unparse_order_by(self, order_by):
+        # can add column specific order? like col1 decs, col2 asc
         return f'ORDER BY {", ".join(self.unparse_val_unit(v) for v in order_by["val_units"])} {order_by["order"]["_type"]}'

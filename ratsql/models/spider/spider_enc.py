@@ -79,6 +79,7 @@ def preprocess_schema_uncached(schema,
         else:
             column_name = [type_tok] + col_toks
 
+        # bert version don't have include_table_name_in_column
         if include_table_name_in_column:
             if column.table is None:
                 table_name = ['<any-table>']
@@ -558,6 +559,8 @@ class Bertokens:
         E.g., a ##b ##c will be normalized as "abc", "", ""
         NOTE: this is only used for schema linking
         """
+        # concatenate all pieces when there are ## between them,
+        # strip ## and add them to the previous piece without ##
         self.startidx2pieces = dict()
         self.pieces2startidx = dict()
         cache_start = None
@@ -575,6 +578,7 @@ class Bertokens:
         assert cache_start is None
 
         # combine pieces, "abc", "", ""
+        # startidx2pieces  start: key, end: value
         combined_word = {}
         for start, end in self.startidx2pieces.items():
             assert end - start + 1 < 10
@@ -591,6 +595,7 @@ class Bertokens:
                 new_toks.append(combined_word[i])
             elif i in self.pieces2startidx:
                 # remove it
+                # i is not the start id of individual word and start with ##
                 pass
             else:
                 idx_map[len(new_toks)] = i
@@ -614,6 +619,12 @@ class Bertokens:
         table_tokens = [t.normalized_pieces for t in tables]
         sc_link = compute_schema_linking(question_tokens, column_tokens, table_tokens)
 
+        # sc_link is a dict, contain question column match and question table match
+        # {"q_col_match": q_col_match, "q_tab_match": q_tab_match}
+        # content: q_col_match[f"{q_id},{col_id}"] = "CPM"
+        # this function normalize the column and table name to make them suitable for match
+        # then match them to create the schema linking
+
         new_sc_link = {}
         for m_type in sc_link:
             _match = {}
@@ -629,6 +640,10 @@ class Bertokens:
     def bert_cv_linking(self, schema):
         question_tokens = self.recovered_pieces  # Not using normalized tokens here because values usually match exactly
         cv_link = compute_cell_value_linking(question_tokens, schema)
+
+        # sc_link is a dict, contain value column match: when value is a number or a string
+        # {"num_date_match": num_date_match, "cell_match": cell_match}
+        # content: cell_match[f"{q_id},{col_id}"] = "CELLMATCH"
 
         new_cv_link = {}
         for m_type in cv_link:
@@ -715,6 +730,7 @@ class SpiderEncoderBertPreproc(SpiderEncoderV2Preproc):
         }
 
     def validate_item(self, item, section):
+        # check if length of X is no longer than 512
         question = self._tokenize(item.text, item.orig['question'])
         preproc_schema = self._preprocess_schema(item.schema)
 
@@ -953,6 +969,7 @@ class SpiderEncoderBert(torch.nn.Module):
         Since bert cannot handle sequence longer than 512, each column/table is encoded individually
         The representation of a column/table is the vector of the first token [CLS]
         """
+        # encode column and table names first
         qs = self.pad_single_sentence_for_bert(desc['question'], cls=True)
         cols = [self.pad_single_sentence_for_bert(c, cls=True) for c in desc['columns']]
         tabs = [self.pad_single_sentence_for_bert(t, cls=True) for t in desc['tables']]

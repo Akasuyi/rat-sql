@@ -83,6 +83,7 @@ class InferenceTreeTraversal(TreeTraversal):
         ]
 
     def update_using_last_choice(self, last_choice, extra_choice_info, attention_offset):
+        # append action to action list according to current state
         super().update_using_last_choice(last_choice, extra_choice_info, attention_offset)
 
         # Record actions
@@ -121,6 +122,7 @@ class InferenceTreeTraversal(TreeTraversal):
             self.actions = self.actions.append(self.NodeFinished())
 
     def finalize(self):
+        # convert Actions into tree of nodes(represented by dic)
         root = current = None
         stack = []
         for i, action in enumerate(self.actions):

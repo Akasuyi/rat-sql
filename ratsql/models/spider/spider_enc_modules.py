@@ -329,7 +329,7 @@ class RelationalTransformerUpdate(torch.nn.Module):
         self.tt_max_dist = tt_max_dist
         self.tt_foreign_key = tt_foreign_key
 
-        self.relation_ids = {}
+        self.relation_ids = {}   # relation 2 id
 
         def add_relation(name):
             self.relation_ids[name] = len(self.relation_ids)
@@ -340,27 +340,27 @@ class RelationalTransformerUpdate(torch.nn.Module):
 
         add_rel_dist('qq_dist', qq_max_dist)
 
-        add_relation('qc_default')
+        add_relation('qc_default')  # question column
         # if qc_token_match:
         #    add_relation('qc_token_match')
 
-        add_relation('qt_default')
+        add_relation('qt_default')  # question table
         # if qt_token_match:
         #    add_relation('qt_token_match')
 
-        add_relation('cq_default')
+        add_relation('cq_default')  # column question
         # if cq_token_match:
         #    add_relation('cq_token_match')
 
-        add_relation('cc_default')
+        add_relation('cc_default')  # column column
         if cc_foreign_key:
-            add_relation('cc_foreign_key_forward')
+            add_relation('cc_foreign_key_forward')  # column column
             add_relation('cc_foreign_key_backward')
         if cc_table_match:
             add_relation('cc_table_match')
         add_rel_dist('cc_dist', cc_max_dist)
 
-        add_relation('ct_default')
+        add_relation('ct_default')  # column table
         if ct_foreign_key:
             add_relation('ct_foreign_key')
         if ct_table_match:
@@ -368,11 +368,11 @@ class RelationalTransformerUpdate(torch.nn.Module):
             add_relation('ct_table_match')
             add_relation('ct_any_table')
 
-        add_relation('tq_default')
+        add_relation('tq_default')  # table question
         # if cq_token_match:
         #    add_relation('tq_token_match')
 
-        add_relation('tc_default')
+        add_relation('tc_default')  # table column
         if tc_table_match:
             add_relation('tc_primary_key')
             add_relation('tc_table_match')
@@ -380,7 +380,7 @@ class RelationalTransformerUpdate(torch.nn.Module):
         if tc_foreign_key:
             add_relation('tc_foreign_key')
 
-        add_relation('tt_default')
+        add_relation('tt_default')  # table table
         if tt_foreign_key:
             add_relation('tt_foreign_key_forward')
             add_relation('tt_foreign_key_backward')
@@ -510,6 +510,7 @@ class RelationalTransformerUpdate(torch.nn.Module):
         c_enc_new = enc_new[:, c_base:t_base]
         t_enc_new = enc_new[:, t_base:]
 
+        # compute formula (3)
         m2c_align_mat = self.align_attn(enc_new, enc_new[:, c_base:t_base], \
                                         enc_new[:, c_base:t_base], relations_t[:, c_base:t_base])
         m2t_align_mat = self.align_attn(enc_new, enc_new[:, t_base:], \

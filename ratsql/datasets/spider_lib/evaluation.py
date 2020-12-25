@@ -491,9 +491,13 @@ class Evaluator:
 
         # rebuild sql for value evaluation
         kmap = self.kmaps[db_name]
+        # find all columns in relative tables, stored in valid_col_units
         g_valid_col_units = build_valid_col_units(g_sql['from']['table_units'], schema)
+        # sort all conditions part into whole list
         g_sql = rebuild_sql_val(g_sql)
+        # convert original cols to validated ones
         g_sql = rebuild_sql_col(g_valid_col_units, g_sql, kmap)
+
         p_valid_col_units = build_valid_col_units(p_sql['from']['table_units'], schema)
         p_sql = rebuild_sql_val(p_sql)
         p_sql = rebuild_sql_col(p_valid_col_units, p_sql, kmap)
@@ -532,6 +536,7 @@ class Evaluator:
         }
 
     def finalize(self):
+        # calculate scores percentage from count
         scores = self.scores
         for level in LEVELS:
             if scores[level]['count'] == 0:
@@ -659,7 +664,7 @@ def eval_exec_match(db, p_str, g_str, pred, gold):
 def rebuild_cond_unit_val(cond_unit):
     if cond_unit is None or not DISABLE_VALUE:
         return cond_unit
-
+    # cond_unit : (not_op, op_id, val_unit, val1, val2)
     not_op, op_id, val_unit, val1, val2 = cond_unit
     if type(val1) is not dict:
         val1 = None
@@ -682,6 +687,7 @@ def rebuild_condition_val(condition):
             res.append(rebuild_cond_unit_val(it))
         else:
             res.append(it)
+            # do nothing because it is 'and'
     return res
 
 
@@ -689,6 +695,7 @@ def rebuild_sql_val(sql):
     if sql is None or not DISABLE_VALUE:
         return sql
 
+    # sort these conditions part into whole list
     sql['from']['conds'] = rebuild_condition_val(sql['from']['conds'])
     sql['having'] = rebuild_condition_val(sql['having'])
     sql['where'] = rebuild_condition_val(sql['where'])
@@ -701,6 +708,7 @@ def rebuild_sql_val(sql):
 
 # Rebuild SQL functions for foreign key evaluation
 def build_valid_col_units(table_units, schema):
+    # find all columns in relative tables, stored in valid_col_units
     col_ids = [table_unit[1] for table_unit in table_units if table_unit[0] == TABLE_TYPE['table_unit']]
     prefixs = [col_id[:-2] for col_id in col_ids]
     valid_col_units = []
@@ -762,12 +770,18 @@ def rebuild_select_col(valid_col_units, sel, kmap):
     if sel is None:
         return sel
     distinct, _list = sel
+    # select unit: (isDistinct, val_units)
+    # val_units: (agg_id, val_unit)
+    # val_unit: (unit_op, col_unit1, col_unit2)
+    # col_units: (agg_id, col_id, isDistinct)
     new_list = []
     for it in _list:
         agg_id, val_unit = it
         new_list.append((agg_id, rebuild_val_unit_col(valid_col_units, val_unit, kmap)))
     if DISABLE_DISTINCT:
         distinct = None
+    # new_list: list [(agg_id, (unit_op, col_unit1, col_unit2)),...]
+    # col_unit: (agg_id, col_id, distinct)
     return distinct, new_list
 
 

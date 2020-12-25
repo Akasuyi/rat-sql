@@ -41,16 +41,16 @@ class TreeTraversal:
             return f"<state: {self.state}, node_type: {self.node_type}, parent_field_name: {self.parent_field_name}>"
 
     class State(enum.Enum):
-        SUM_TYPE_INQUIRE = 0
-        SUM_TYPE_APPLY = 1
-        CHILDREN_INQUIRE = 2
-        CHILDREN_APPLY = 3
-        LIST_LENGTH_INQUIRE = 4
-        LIST_LENGTH_APPLY = 5
-        GEN_TOKEN = 6
-        POINTER_INQUIRE = 7
-        POINTER_APPLY = 8
-        NODE_FINISHED = 9
+        SUM_TYPE_INQUIRE = 0  # sum type inquire
+        SUM_TYPE_APPLY = 1  # sum type apply
+        CHILDREN_INQUIRE = 2  # children inquire
+        CHILDREN_APPLY = 3  # children apply
+        LIST_LENGTH_INQUIRE = 4  # list length inquire
+        LIST_LENGTH_APPLY = 5  # list length apply
+        GEN_TOKEN = 6  # generate token
+        POINTER_INQUIRE = 7  # pointer inquire
+        POINTER_APPLY = 8  # pointer apply
+        NODE_FINISHED = 9  # node finished
 
     def __init__(self, model, desc_enc):
         if model is None:

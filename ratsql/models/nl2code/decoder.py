@@ -128,6 +128,7 @@ class NL2CodeDecoderPreproc(abstract_preproc.AbstractPreproc):
             NL2CodeDecoderPreprocItem(
                 tree=root,
                 orig_code=item.code))
+        # root is parsed sql, item.code is raw SQLs in original data
 
     def clear_items(self):
         self.items = collections.defaultdict(list)
@@ -282,6 +283,7 @@ class NL2CodeDecoderPreproc(abstract_preproc.AbstractPreproc):
             type_info = self.ast_wrapper.singular_types[node['_type']]
 
             for field_info in reversed(type_info.fields):
+                # node type: dict
                 field_value = node.get(field_info.name)
                 if field_info.type in self.grammar.pointers:
                     pass
@@ -702,6 +704,8 @@ class NL2CodeDecoder(torch.nn.Module):
             parent_h,
             parent_action_emb,
             desc_enc):
+        # update LSTM state in decoder, including concatenate several embedding to form input.
+
         # desc_context shape: batch (=1) x emb_size
         desc_context, attention_logits = self._desc_attention(prev_state, desc_enc)
         # node_type_emb shape: batch (=1) x emb_size
@@ -730,6 +734,8 @@ class NL2CodeDecoder(torch.nn.Module):
             parent_h,
             parent_action_emb,
             desc_enc):
+        # select a rule to apply, implement APPLYRULE
+
         new_state, attention_logits = self._update_state(
             node_type, prev_state, prev_action_emb, parent_h, parent_action_emb, desc_enc)
         # output shape: batch (=1) x emb_size
